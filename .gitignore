@@ -1,0 +1,21 @@
+# --- 모든 곳에서 해당 확장자 차단 ---
+*.jpg
+*.mp4
+*.pt
+*.onnx
+*.weights
+*.log
+*.npy
+
+# --- 모든 곳에서 해당 폴더 차단 ---
+**/__pycache__/
+**/venv/
+**/node_modules/
+**/dist/
+**/runs/
+**/.vscode/
+**/.idea/
+
+# --- 환경 설정 파일 ---
+.env
+.env.*

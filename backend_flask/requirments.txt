@@ -1,0 +1,13 @@
+flask-socketio
+flask-cors 
+flask-sqlalchemy
+flask-migrate
+pymysql 
+flask-jwt-extended 
+opencv-python
+ultralytics
+gevent 
+gevent-websocket
+requests
+python-dotenv
+cryptography
