@@ -26,27 +26,22 @@ jobs:
           key: ${{ secrets.SSH_KEY }}       # 아까 생성한 id_rsa 내용
           port: 22
           script: |
-            # 프로젝트 폴더로 이동
             cd ~/바탕화면/TADS/Real_project
-            
-            # 최신 코드 내려받기
             git pull origin main
-            
-            # --- Backend (Flask) 업데이트 ---
-            cd backend_flask
-            # 가상환경이 있다면 활성화 후 패키지 업데이트
-            # source venv/bin/activate
+
+            # 1. Frontend (React) 재실행
+            cd frontend_js
+            npm install                        # 패키지 변화 대응
+            fuser -k 5173/tcp || true          # 기존 React(Vite) 프로세스 종료
+            # 백그라운드 실행 (로그는 react.log에 저장, --host는 외부 접속 허용 설정)
+            nohup npm run dev -- --host > react.log 2>&1 &
+
+            # 2. Backend (Flask) 재실행
+            cd ../backend_flask
+            # 가상환경 사용 시: source venv/bin/activate
             # pip install -r requirements.txt
-            
-            # 기존에 돌아가던 Flask 프로세스 종료 (5000번 포트 기준)
-            fuser -k 5000/tcp || true
-            
-            # 백그라운드에서 Flask 실행 (로그는 배포 확인용)
+            fuser -k 5000/tcp || true          # 기존 Flask 프로세스 종료
+            # 백그라운드 실행 (로그는 flask.log에 저장)
             nohup python3 app.py > flask.log 2>&1 &
-            
-            # --- Frontend (React) 업데이트 (필요시) ---
-            # cd ../frontend_js
-            # npm install
-            # npm run build # 빌드 결과물이 Flask에서 서빙된다면 실행
-            
-            echo "배포 완료!"
+
+            echo "React(5173)와 Flask(5000) 모두 재시작되었습니다!"
