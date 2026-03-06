@@ -1,0 +1,52 @@
+name: Deploy to Ubuntu
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 1. Tailscale 연결 (GitHub 서버가 내 가상머신을 찾게 함)
+      - name: Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      # 2. SSH 접속 후 배포 스크립트 실행
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_IP }}     # Tailscale에서 받은 100.x.x.x 주소
+          username: ${{ secrets.REMOTE_USER }} # ubuntu
+          key: ${{ secrets.SSH_KEY }}       # 아까 생성한 id_rsa 내용
+          port: 22
+          script: |
+            # 프로젝트 폴더로 이동
+            cd ~/바탕화면/TADS/Real_project
+            
+            # 최신 코드 내려받기
+            git pull origin main
+            
+            # --- Backend (Flask) 업데이트 ---
+            cd backend_flask
+            # 가상환경이 있다면 활성화 후 패키지 업데이트
+            # source venv/bin/activate
+            # pip install -r requirements.txt
+            
+            # 기존에 돌아가던 Flask 프로세스 종료 (5000번 포트 기준)
+            fuser -k 5000/tcp || true
+            
+            # 백그라운드에서 Flask 실행 (로그는 배포 확인용)
+            nohup python3 app.py > flask.log 2>&1 &
+            
+            # --- Frontend (React) 업데이트 (필요시) ---
+            # cd ../frontend_js
+            # npm install
+            # npm run build # 빌드 결과물이 Flask에서 서빙된다면 실행
+            
+            echo "배포 완료!"
