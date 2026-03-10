@@ -11,7 +11,7 @@ export default defineConfig({
     // 필요 시 CORS 에러 방지를 위한 설정
     cors: true,
     allowedHosts: [
-      '.ts.net' // 모든 Tailscale 주소를 허용하고 싶을 때 (마침표 포함)
+      '.ts.net' // 모든 Tailscale 주소를 허용하고 싶을 때 (마침표 포함)..
     ]
   }
 })
